@@ -1,0 +1,35 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Unity
+      uses: kuler90/setup-unity@v1
+      with:
+        unity-version: 2019.4.31f1
+        unity-modules: windows-il2cpp
+
+    - name: Activate Unity
+      uses: kuler90/activate-unity@v1
+      with:
+        unity-username: ${{ secrets.UNITY_USERNAME }}
+        unity-password: ${{ secrets.UNITY_PASSWORD }}
+
+    - name: Build Unity
+      uses: kuler90/build-unity@v1
+      with:
+        build-target: Windows
+        build-path: ./build/
+
+    - name: Run Command
+      run: |
+        dir
+
