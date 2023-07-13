@@ -11,6 +11,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Run Command 1
+      run: |
+       sudo add-apt-repository universe
+       sudo apt install libfuse2        
+
     - name: Setup Unity
       uses: kuler90/setup-unity@v1
       with:
@@ -29,7 +34,7 @@ jobs:
         build-target: Windows
         build-path: ./build/
 
-    - name: Run Command
+    - name: Run Command 2
       run: |
         dir
 
