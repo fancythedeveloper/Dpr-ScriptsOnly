@@ -1,4 +1,4 @@
-name: CMake
+name: Build Dpr-ScriptsOnly
 
 on:
   push:
@@ -6,35 +6,55 @@ on:
 
 jobs:
   build:
+    name: Build for ${{ matrix.targetPlatform }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        targetPlatform:
+          - StandaloneWindows64
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        # with:
+        #   lfs: true
 
-    - name: Run Command 1
-      run: |
-       sudo add-apt-repository universe
-       sudo apt install libfuse2        
+      # Cache reused Library files to speed up compilation
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
 
-    - name: Setup Unity
-      uses: kuler90/setup-unity@v1
-      with:
-        unity-version: 2019.4.31f1
-        unity-modules: windows-il2cpp
+      # Test (No tests yet, leaving this here for future.)
+      # - name: Run tests
+      #   uses: game-ci/unity-test-runner@v2
+      #   env:
+      #     UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      #   with:
+      #     githubToken: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Activate Unity
-      uses: kuler90/activate-unity@v1
-      with:
-        unity-username: ${{ secrets.UNITY_USERNAME }}
-        unity-password: ${{ secrets.UNITY_PASSWORD }}
+      - name: Build project
+        uses: game-ci/unity-builder@v2
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: auto
+          buildName: Dpr-ScriptsOnly
+          buildsPath: build
+          buildMethod: UnityBuilderAction.BuildScript.Build
+          targetPlatform: ${{ matrix.targetPlatform }}
 
-    - name: Build Unity
-      uses: kuler90/build-unity@v1
-      with:
-        build-target: Windows
-        build-path: ./build/
+      - name: Upload Artifact (Windows)
+        if: matrix.targetPlatform == 'StandaloneWindows64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.targetPlatform }}-build
+          path: ./build/${{ matrix.targetPlatform }}/
 
-    - name: Run Command 2
-      run: |
-        dir
-
+      - name: debug thing
+        run: tree .
