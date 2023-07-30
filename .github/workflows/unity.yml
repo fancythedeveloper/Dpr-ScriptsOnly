@@ -49,8 +49,8 @@ jobs:
           buildMethod: UnityBuilderAction.BuildScript.Build
           targetPlatform: ${{ matrix.targetPlatform }}
 
-      - name: Upload Artifact (Windows)
-        if: matrix.targetPlatform == 'StandaloneWindows64'
+      - name: Upload Artifact
+        if: matrix.targetPlatform == 'Android'
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.targetPlatform }}-build
